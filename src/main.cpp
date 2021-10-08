@@ -31,24 +31,32 @@ void setup()
     pinMode(MOTOR_B_FORWARD, OUTPUT);
     pinMode(MOTOR_B_BACKWARDS, OUTPUT);
 
+    // initialize gray scale
+    pinMode(GRAY_SCALE_FRONT, INPUT);
 
+    // initialize serial
+    Serial.begin(9600);
 
+}
 
-
+int grayScaleSensor() {
+    return analogRead(GRAY_SCALE_FRONT);
 }
 
 void loop()
 {
-    // turn the LED on (HIGH is the voltage level)
-    digitalWrite(LED_BUILTIN, HIGH);
-    // wait for a second
-    delay(1000);
 
-    motor(-3, -3);
-    // turn the LED off by making the voltage LOW
-    digitalWrite(LED_BUILTIN, LOW);
-    // wait for a second
-    delay(1000);
+    // turn on different to white
+    if (grayScaleSensor() < 200) {
+        motor(-200, -200);
+    } else {
+        motor(200, 200);
+    }
 
-    motor(3, 3);
+    Serial.println(grayScaleSensor());
+
+    delay(100);
+
+    // wait for a second#
+
 }
