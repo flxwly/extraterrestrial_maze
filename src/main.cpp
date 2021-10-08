@@ -1,21 +1,16 @@
-
-
-
-/*
- * Blink
- * Turns on an LED on for one second,
- * then off for one second, repeatedly.
- */
-
+// libs
 #include <Arduino.h>
-#include "BOARD_INFO.hpp"
+
+// project files
+#include "BoardInfo.hpp"
+
 
 void motor(int l, int r) {
-    analogWrite(MOTOR_A_SPEED, abs(l));
+    analogWrite(MOTOR_A_SPEED, min(abs(l), MOTOR_MAX_SPEED));
     digitalWrite(MOTOR_A_FORWARD, (l < 0) ? LOW : HIGH);
     digitalWrite(MOTOR_A_BACKWARDS, (l > 0) ? LOW : HIGH);
 
-    analogWrite(MOTOR_B_SPEED, abs(r));
+    analogWrite(MOTOR_B_SPEED, min(abs(r), MOTOR_MAX_SPEED));
     digitalWrite(MOTOR_B_FORWARD, (r < 0) ? LOW : HIGH);
     digitalWrite(MOTOR_B_BACKWARDS, (r > 0) ? LOW : HIGH);
 }
@@ -32,31 +27,20 @@ void setup()
     pinMode(MOTOR_B_BACKWARDS, OUTPUT);
 
     // initialize gray scale
-    pinMode(GRAY_SCALE_FRONT, INPUT);
+    pinMode(GC_SENSOR_FRONT, INPUT);
+    pinMode(GC_SENSOR_BACK, INPUT);
+
 
     // initialize serial
     Serial.begin(9600);
 
 }
 
-int grayScaleSensor() {
-    return analogRead(GRAY_SCALE_FRONT);
-}
-
 void loop()
 {
 
-    // turn on different to white
-    if (grayScaleSensor() < 200) {
-        motor(-200, -200);
-    } else {
-        motor(200, 200);
-    }
-
-    Serial.println(grayScaleSensor());
-
+    Serial.println(analogRead(GC_SENSOR_FRONT));
     delay(100);
 
-    // wait for a second#
 
 }
