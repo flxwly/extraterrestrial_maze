@@ -1,8 +1,7 @@
 // libs
 #include <Arduino.h>
-
-// project files
 #include "BoardInfo.hpp"
+#include "./../lib/LSM303/LSM303.h"
 
 
 void motor(int l, int r) {
@@ -29,7 +28,6 @@ void setup()
     // initialize gray scale
     pinMode(GC_SENSOR_FRONT, INPUT);
     pinMode(GC_SENSOR_BACK, INPUT);
-
 
     // initialize serial
     Serial.begin(9600);

@@ -18,19 +18,19 @@ void Map::addTile(Map *map, Tile *tile, int direction, Tile tile1) {
     map->map[map->index] = tile1;
 
     switch (direction) {
-        case 1:
+        case EAST:
             tile->right = &map->map[map->index];
             map->map[map->index].left = tile;
             break;
-        case 2:
+        case NORTH:
             tile->top = &map->map[map->index];
             map->map[map->index].bottom = tile;
             break;
-        case 3:
+        case WEST:
             tile->left = &map->map[map->index];
             map->map[map->index].right = tile;
             break;
-        case 4:
+        case SOUTH:
             tile->bottom = &map->map[map->index];
             map->map[map->index].top = tile;
             break;
