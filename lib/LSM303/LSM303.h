@@ -119,7 +119,7 @@ class LSM303
 
       // dummy addresses for registers in different locations on different devices;
       // the library translates these based on device type
-      // value with sign flipped is used as index into translated_regs array
+      // value with sign flipped is used as length into translated_regs array
 
       OUT_X_H_M         = -1,
       OUT_X_L_M         = -2,
@@ -204,7 +204,7 @@ class LSM303
     byte mag_address;
 
     static const int dummy_reg_count = 6;
-    regAddr translated_regs[dummy_reg_count + 1]; // index 0 not used
+    regAddr translated_regs[dummy_reg_count + 1]; // length 0 not used
 
     unsigned int io_timeout;
     bool did_timeout;

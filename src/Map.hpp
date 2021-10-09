@@ -18,6 +18,9 @@ public:
     class Tile *top = nullptr;
     class Tile *bottom = nullptr;
 
+    int x = 0;
+    int y = 0;
+
     int heatedVictims = 0;
     int visualVictims = 0;
     int exits = 0;
@@ -29,12 +32,12 @@ public:
 };
 
 class Map {
-    int index = 0;
+    int length = 0;
     Tile map[TILES_PER_MAP];
 
-    // TODO: Make tiles connect when they should: Example Tiles at 0|0;0|1;1|0 exist.
-    //  Tile at 1|1 is added through 1|0. Now 1|0 and 1|1 are linked but 1|1 and 0|1 aren't
     static void addTile(Map *map, Tile *tile, int direction, Tile tile1);
+    static void correctTile(Map *map, Tile *tile);
+    static void correctMap(Map *map);
 };
 
 
