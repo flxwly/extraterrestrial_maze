@@ -5,9 +5,9 @@ set(CMAKE_CXX_COMPILER_WORKS 1)
 
 project("extraterrestrial_maze" C CXX)
 
-include(CMakeListsPrivate.txt)
-
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMakeListsUser.txt)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMakeListsPrivate.txt)
+    include(CMakeListsPrivate.txt)
+else()
     include(CMakeListsUser.txt)
 endif()
 
@@ -23,4 +23,4 @@ add_custom_target(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_executable(extraterrestrial_maze ${SRC_LIST} src/main.cpp src/BoardInfo.hpp)
+add_executable(extraterrestrial_maze ${SRC_LIST} src/main.cpp src/BoardInfo.hpp src/Map.cpp src/Map.hpp)
