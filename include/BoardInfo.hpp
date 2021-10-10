@@ -16,8 +16,7 @@
 #define GC_SENSOR_FRONT A6
 #define GC_SENSOR_BACK A7
 
-
-//
+// Laser Range Sensors
 
 
 #endif //EXTRATERRESTRIAL_MAZE_BOARDINFO_HPP

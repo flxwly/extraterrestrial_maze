@@ -29,8 +29,11 @@ void setup()
     pinMode(GC_SENSOR_FRONT, INPUT);
     pinMode(GC_SENSOR_BACK, INPUT);
 
+    // initialize laser range
+
+
     // initialize serial
-    Serial.begin(9600);
+    Serial.begin(115200);
 
 }
 

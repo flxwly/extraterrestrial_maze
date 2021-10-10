@@ -32,12 +32,18 @@ public:
 };
 
 class Map {
+public:
+    Map() = default;
+
+    void addTile(Tile *tile, int direction, Tile tile1);
+    Tile *getTile(Tile *tile, int direction);
+    Tile *getTile(int x, int y);
+private:
     int length = 0;
     Tile map[TILES_PER_MAP];
 
-    static void addTile(Map *map, Tile *tile, int direction, Tile tile1);
-    static void correctTile(Map *map, Tile *tile);
-    static void correctMap(Map *map);
+    void correctTile(Tile *tile);
+    void correctMap();
 };
 
 
