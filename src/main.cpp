@@ -54,20 +54,23 @@ void setup()
 
 }
 
+void alignToWall(bool leftWall, double maxDif) {
+    double front;
+    double back;
+    double motorSpeed;
+
+    do {
+        front = (leftWall) ? getDist(LR_SENSOR_SIDE_FRONT_LEFT) : getDist(LR_SENSOR_SIDE_FRONT_RIGHT);
+        back = (leftWall) ? getDist(LR_SENSOR_SIDE_BACK_LEFT) : getDist(LR_SENSOR_SIDE_BACK_RIGHT);
+        motorSpeed = 5* (front - back);
+
+        motor(motorSpeed, -motorSpeed);
+    }
+    while (abs(front - back) > maxDif);
+}
+
 void loop() {
 
-
-
-    compass.read();
-    if (compass.getAngle() < 1000) {
-        motor(100, -100);
-    } else if (compass.getAngle() > 1100) {
-        motor(-100, 100);
-    } else {
-        motor(50, 50);
-    }
-
-    Serial.println(compass.getAngle());
-
+    alignToWall(false, 2);
     delay(10);
 }
