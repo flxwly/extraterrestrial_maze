@@ -5,8 +5,8 @@ set(CMAKE_CXX_COMPILER_WORKS 1)
 
 project("extraterrestrial_maze" C CXX)
 
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMakeListsPrivate.txt)
-    include(CMakeListsPrivate.txt)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMakeListsprevate.txt)
+    include(CMakeListsprevate.txt)
 else()
     include(CMakeListsUser.txt)
 endif()
