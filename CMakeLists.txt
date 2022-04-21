@@ -23,4 +23,4 @@ add_custom_target(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_executable(extraterrestrial_maze ${SRC_LIST} src/main.cpp include/BoardInfo.hpp include/Compass.hpp)
+add_executable(extraterrestrial_maze ${SRC_LIST} src/main.cpp include/BoardInfo.hpp include/Compass.hpp src/Map.hpp)
