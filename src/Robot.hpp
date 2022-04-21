@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "Map.hpp"
+#include "LaserRangeSensor.hpp"
 #include "BoardInfo.hpp"
 
 #define MIN_DIST_FOR_WALL 15
@@ -25,6 +26,8 @@ public:
      */
     static void motor(int left, int right);
 
+    static void alignLeft(double maxDif = 0);
+    static void alignRight(double maxDif = 0);
 
     void onUpdate();
 

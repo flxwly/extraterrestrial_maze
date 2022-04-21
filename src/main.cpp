@@ -28,21 +28,6 @@ void setup()
     robot = Robot(compass.getAngle());
 }
 
-void alignToWall(bool leftWall, double maxDif) {
-    double front;
-    double back;
-    double motorSpeed;
-
-    do {
-        front = (leftWall) ? getDist(LR_SENSOR_SIDE_FRONT_LEFT) : getDist(LR_SENSOR_SIDE_FRONT_RIGHT);
-        back = (leftWall) ? getDist(LR_SENSOR_SIDE_BACK_LEFT) : getDist(LR_SENSOR_SIDE_BACK_RIGHT);
-        motorSpeed = 5 * lround(pow(front - back, 3));
-
-        motor(motorSpeed, -motorSpeed);
-    }
-    while (abs(front - back) > maxDif);
-}
-
 void loop() {
     alignToWall(false, 2);
 //    Serial.println("------- Right -------");
