@@ -5,53 +5,27 @@
 // include
 #include "BoardInfo.hpp"
 #include "Compass.hpp"
+#include "Robot.hpp"
+#include "LaserRangeSensor.hpp"
 
-Compass compass = Compass();
+Compass compass;
+Robot robot;
 
-double getDist(int address) {
-    const double k = -0.1090;
-    const double b = 54.71;
-    return k * analogRead(address) + b;
-}
 
-void motor(int l, int r) {
-    analogWrite(MOTOR_A_SPEED, min(abs(l), MOTOR_MAX_SPEED));
-    digitalWrite(MOTOR_A_FORWARD, (l < 0) ? LOW : HIGH);
-    digitalWrite(MOTOR_A_BACKWARDS, (l > 0) ? LOW : HIGH);
-
-    analogWrite(MOTOR_B_SPEED, min(abs(r), MOTOR_MAX_SPEED));
-    digitalWrite(MOTOR_B_FORWARD, (r < 0) ? LOW : HIGH);
-    digitalWrite(MOTOR_B_BACKWARDS, (r > 0) ? LOW : HIGH);
-}
 
 void setup()
 {
+    // initialize serial communication
+    Serial.begin(9600);
+
+    // initialize Wire (I2C)
     Wire.begin();
 
-    // initialize motor pins as output.
-    pinMode(MOTOR_A_SPEED, OUTPUT);
-    pinMode(MOTOR_A_FORWARD, OUTPUT);
-    pinMode(MOTOR_A_BACKWARDS, OUTPUT);
-    pinMode(MOTOR_B_SPEED, OUTPUT);
-    pinMode(MOTOR_B_FORWARD, OUTPUT);
-    pinMode(MOTOR_B_BACKWARDS, OUTPUT);
+    // initialize compass
+    compass = Compass();
 
-    // Init LED
-    pinMode(ON_BOARD_LED, OUTPUT);
-
-    // initialize gray scale
-    pinMode(GC_SENSOR_FRONT, INPUT);
-    pinMode(GC_SENSOR_BACK, INPUT);
-
-    // initialize laser range
-    pinMode(LR_SENSOR_SIDE_FRONT_RIGHT, INPUT);
-    pinMode(LR_SENSOR_SIDE_BACK_RIGHT, INPUT);
-    pinMode(LR_SENSOR_SIDE_FRONT_LEFT, INPUT);
-    pinMode(LR_SENSOR_SIDE_BACK_LEFT, INPUT);
-
-    // initialize serial
-    Serial.begin(115200);
-
+    // initialize robot
+    robot = Robot(compass.getAngle());
 }
 
 void alignToWall(bool leftWall, double maxDif) {
@@ -62,7 +36,7 @@ void alignToWall(bool leftWall, double maxDif) {
     do {
         front = (leftWall) ? getDist(LR_SENSOR_SIDE_FRONT_LEFT) : getDist(LR_SENSOR_SIDE_FRONT_RIGHT);
         back = (leftWall) ? getDist(LR_SENSOR_SIDE_BACK_LEFT) : getDist(LR_SENSOR_SIDE_BACK_RIGHT);
-        motorSpeed = 5* (front - back);
+        motorSpeed = 5 * lround(pow(front - back, 3));
 
         motor(motorSpeed, -motorSpeed);
     }
@@ -70,7 +44,17 @@ void alignToWall(bool leftWall, double maxDif) {
 }
 
 void loop() {
-
     alignToWall(false, 2);
-    delay(10);
+//    Serial.println("------- Right -------");
+//    Serial.print("Front: ");
+//    Serial.println(getDist(LR_SENSOR_SIDE_FRONT_RIGHT));
+//    Serial.print("Back: ");
+//    Serial.println(getDist(LR_SENSOR_SIDE_BACK_RIGHT));
+//    Serial.println("------- Left -------");
+//    Serial.print("Front: ");
+//    Serial.println(getDist(LR_SENSOR_SIDE_FRONT_LEFT));
+//    Serial.print("Back: ");
+//    Serial.println(getDist(LR_SENSOR_SIDE_BACK_LEFT));
+
+    delay(200);
 }

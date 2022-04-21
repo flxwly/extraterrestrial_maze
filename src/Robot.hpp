@@ -1,43 +1,35 @@
+#include <Arduino.h>
 #include "Map.hpp"
+#include "BoardInfo.hpp"
 
 #define MIN_DIST_FOR_WALL 15
 
 
-class Robot
-{
+class Robot {
+
 private:
-    Tile *Pos = nullptr;
-    
-    // Map map = Map();
-    
+    double startOrientation = 0;
+
+    Tile startingTile{};
+    double x = 0, y = 0;
 
 public:
-    Robot(Tile *start);
-    void changePos(Tile *cur);
-    bool isWall(int dir);
+    Robot() = default;
+    explicit Robot(double orientation);
 
-    //sensors
-    double getDist(int adress);
-    
+    /**
+     * Sets the motors to the given speed.
+     * @param left left motor speed
+     * @param right right motor speed
+     * @note speed is in range [-MOTOR_MAX_SPEED, MOTOR_MAX_SPEED]
+     */
+    static void motor(int left, int right);
+
+
+    void onUpdate();
+
+    //    void changePos(Tile *cur);
+    //    bool isWall(int dir);
+
 };
-
-Robot::Robot(Tile *start)
-{
-    Pos = start;
-}
-
-
-///Sensors
-//TODO IR-Sensor
-double Robot::getDist(int adress){
-    int k = 0;
-    return k;
-}
-
-
-
-///
-void Robot::changePos(Tile *cur){
-    Pos = cur;
-}
 

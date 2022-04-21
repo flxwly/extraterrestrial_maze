@@ -3,12 +3,6 @@
 
 #include <math.h>
 #include "BoardInfo.hpp"
-#include <vector>
-
-#define EAST 1
-#define NORTH 2
-#define WEST 3
-#define SOUTH 4
 
 #define LEFT 1
 #define RIGHT 2
@@ -18,63 +12,46 @@
 #define TILES_PER_MAP 100
 
 class Tile {
-public:
+private:
+
+    // The tile's position on the map assuming there's only one floor
+    int x = 0, y = 0;
+
     // pointers for quadruple linked list
-    //nullptr - undef; obj wall - wall
+    // nullptr if not in use, otherwise points to next tile
     Tile *left = nullptr;
     Tile *right = nullptr;
     Tile *top = nullptr;
     Tile *bottom = nullptr;
 
+    // true if this tile is a checkpoint
+    bool checkpoint = false;
 
-    // int heatedVictims = 0;
-    // int visualVictims = 0;
+public:
 
-    bool checkpoint = false; 
-    bool black = false; // TODO: Add better name for tile that shouldnt be passed
+    // Constructor
+    Tile() = default;
 
-    static void addDirectionalAttribute(int *ptr, int direction);
+    // constructor for Tile with previous tile. Previous tile is used to link.
+    // Direction is used to determine which side of the previous tile this tile is on.
+    // The direction is seen from the previous tile's perspective.
+    Tile(Tile* prev, int direction);
 
-    Tile(Tile *prev, int dir);
-    void addTile(Tile *_new, int dir);
+    // returns pointer to tile in given direction
+    Tile *getTile(int direction);
+
+    // adds a tile, that already exists, in the given direction.
+    void addExistingTile(int direction, Tile *tile);
+
+    // creates and adds a tile in the given direction.
+    void addNewTile(int direction);
+
+    // marks this tile as a checkpoint
+    void markCheckpoint();
+
+    // returns true if this tile is a checkpoint
+    bool isCheckpoint() const;
 };
-
-Tile::Tile(Tile *prev, int dir){
-    //set prev dir
-    switch (dir)
-    {
-    case LEFT:
-        left = prev;
-        break;
-    case RIGHT:
-        right = prev;
-        break;
-    case TOP:
-        top = prev;
-        break;
-    case BOTTOM:
-        bottom = prev;
-        break;
-    }
-}
-
-void Tile::addTile(Tile *_new, int dir){
-    switch (dir)
-    {
-    case LEFT:
-        left = _new;
-        break;
-    case RIGHT:
-        right = _new;
-        break;
-    case TOP:
-        top = _new;
-        break;
-    case BOTTOM:
-        bottom = _new;
-        break;
-    }
-}
 
 
 
@@ -89,10 +66,6 @@ public:
 private:
     int length = 0;
     Tile map[TILES_PER_MAP];
-    
-    std::vector<Tile*> checkpoints;
-
-
 
     void correctTile(Tile *tile);
     void correctMap();
