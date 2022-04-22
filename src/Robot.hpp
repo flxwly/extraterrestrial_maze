@@ -43,7 +43,7 @@ public:
     void dropKit();
 
     void onUpdate();
-    void restart();
+    void reset();
     void debug();
 };
 

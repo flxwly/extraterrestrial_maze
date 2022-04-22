@@ -29,7 +29,7 @@ Robot::Robot(double orientation) : startOrientation(orientation) {
     servo.attach(53);
 
     // set initial state
-    restart();
+    reset();
 }
 
 void Robot::motor(int l, int r) {
@@ -130,7 +130,7 @@ void Robot::onUpdate() {
         while (digitalRead(RESET_BUTTON));
         Serial.println("Wait for reset button to be pressed");
         while (!digitalRead(RESET_BUTTON));
-        restart();
+        reset();
         return;
     }
 
@@ -159,7 +159,7 @@ void Robot::onUpdate() {
 
 }
 
-void Robot::restart() {
+void Robot::reset() {
     curDir = 0;
     compass.read();
     startOrientation = compass.getAngle();
