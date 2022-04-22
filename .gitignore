@@ -2,3 +2,5 @@
 CMakeListsprevate.txt
 cmake-build-*/ 
 .vscode
+CMakeListst.txt
+CMakeListsUser.txt
