@@ -14,9 +14,6 @@ void setup()
 
     // initialize Wire (I2C)
     Wire.begin();
-
-    // initialize robot
-    robot.reset();
 }
 
 void loop() {

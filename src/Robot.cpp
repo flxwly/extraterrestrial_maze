@@ -10,7 +10,7 @@ Robot::Robot() {
     pinMode(MOTOR_B_BACKWARDS, OUTPUT);
 
     // Init LED
-    pinMode(ON_BOARD_LED, OUTPUT);
+    pinMode(LED_BUILTIN, OUTPUT);
 
     // initialize gray scale
     pinMode(GC_SENSOR_FRONT, INPUT);
@@ -114,9 +114,9 @@ void Robot::dropKit() {
     delay(1000);
     servo.write(SERVO_DEFAULT_POSITION);
     for (int i = 0; i < 20; ++i) {
-        digitalWrite(ON_BOARD_LED, HIGH);
+        digitalWrite(LED_BUILTIN, HIGH);
         delay(100);
-        digitalWrite(ON_BOARD_LED, LOW);
+        digitalWrite(LED_BUILTIN, LOW);
         delay(100);
     }
 }
@@ -134,7 +134,7 @@ void Robot::onUpdate() {
         return;
     }
 
-    digitalWrite(ON_BOARD_LED, LOW);
+    digitalWrite(LED_BUILTIN, LOW);
     turnTo(curDir);
     compass.read();
     if (compass.getPitch() > 10) {
@@ -163,9 +163,9 @@ void Robot::reset() {
     curDir = 0;
     compass.read();
     startOrientation = compass.getAngle();
-    analogWrite(ON_BOARD_LED, HIGH);
+    analogWrite(LED_BUILTIN, HIGH);
     delay(1000);
-    analogWrite(ON_BOARD_LED, LOW);
+    analogWrite(LED_BUILTIN, LOW);
 }
 
 void Robot::debug() {
