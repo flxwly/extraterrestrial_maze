@@ -34,6 +34,8 @@ public:
         angle16 = high_byte;                 // Calculate 16 bit angle
         angle16 <<= 8;
         angle16 += low_byte;
+        angle16 /= 10;
+        //angle16 >>= 8;
     };
     unsigned int getAngle() const {return angle16;};
     int getPitch() const {return pitch;};

@@ -21,6 +21,9 @@ Robot::Robot(double orientation) : startOrientation(orientation) {
     pinMode(LR_SENSOR_SIDE_BACK_RIGHT, INPUT);
     pinMode(LR_SENSOR_SIDE_FRONT_LEFT, INPUT);
     pinMode(LR_SENSOR_SIDE_BACK_LEFT, INPUT);
+
+    thermometer.begin();
+    servo.attach(53);
 }
 
 void Robot::motor(int l, int r) {
@@ -59,4 +62,108 @@ void Robot::alignRight(double maxDif) {
 
         motor(-motorSpeed, motorSpeed);
     } while (abs(front - back) > maxDif);
+}
+
+void Robot::dropKit() {
+    servo.write(45);
+    delay(70);  // wait for servo to move
+    servo.write(90);
+}
+
+void Robot::onUpdate() {
+    // update the onboard led
+    digitalWrite(ON_BOARD_LED, HIGH);
+
+    compass.read();
+
+
+    turnTo( 90);
+    motor(100, 100);
+    for (int i = 0; i < 40; ++i) {
+        if (thermometer.getObjectTempCelsius() - thermometer.getAmbientTempCelsius() > 5) {
+            dropKit();
+        }
+        delay(10);
+    }
+
+//    Serial.print("LRS: ");
+//    Serial.print(getDist(LR_SENSOR_SIDE_FRONT_RIGHT));
+//    Serial.print("\t");
+//    Serial.print(getDist(LR_SENSOR_SIDE_BACK_RIGHT));
+//    Serial.print("\t");
+//    Serial.print(getDist(LR_SENSOR_SIDE_FRONT_LEFT));
+//    Serial.print("\t");
+//    Serial.print(getDist(LR_SENSOR_SIDE_BACK_LEFT));
+//    Serial.print("\t");
+    Serial.print(compass.getAngle());
+    Serial.print("\t");
+    Serial.println(thermometer.getObjectTempCelsius() - thermometer.getAmbientTempCelsius());
+
+
+
+    //alignLeft(0.1);
+    //motor(50, -50);
+}
+
+void Robot::turnTo(double angle) {
+
+    double diff;
+    double currentOrientation;
+
+    do {
+        compass.read();
+        currentOrientation = startOrientation - compass.getAngle();
+        diff = angle - currentOrientation;
+
+        if (diff > 180) {
+            diff -= 360;
+        } else if (diff < -180) {
+            diff += 360;
+        }
+
+        int state = 0;
+        if (abs(diff) > 100) {
+            state = 1;
+        } else if (abs(diff) > 50) {
+            state = 2;
+        } else if (abs(diff) > 15) {
+            state = 3;
+        } else {
+            state = 4;
+        }
+
+        switch (state) {
+            case 1:
+                if (diff < 0) {
+                    motor(255, -255);
+                } else {
+                    motor(-255, 255);
+                }
+                break;
+            case 2:
+                if (diff < 0) {
+                    motor(200, -200);
+                } else {
+                    motor(-200, 200);
+                }
+                break;
+            case 3:
+                if (diff < 0) {
+                    motor(70, -70);
+                } else {
+                    motor(-70, 70);
+                }
+                break;
+            case 4:
+                if (diff < 0) {
+                    motor(50, -50);
+                } else {
+                    motor(-50, 50);
+                }
+                break;
+        }
+
+        delay(50);
+
+    } while (abs(diff) > 1);
 }

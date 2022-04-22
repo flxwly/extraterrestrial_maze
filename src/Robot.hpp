@@ -1,7 +1,10 @@
 #include <Arduino.h>
+#include <DFRobot_MLX90614.h>
+#include "Compass.hpp"
 #include "Map.hpp"
 #include "LaserRangeSensor.hpp"
 #include "BoardInfo.hpp"
+#include "Servo.h"
 
 #define MIN_DIST_FOR_WALL 15
 
@@ -9,6 +12,11 @@
 class Robot {
 
 private:
+
+    DFRobot_MLX90614_IIC thermometer;
+    Servo servo;
+    Compass compass;
+
     double startOrientation = 0;
 
     Tile startingTile{};
@@ -28,6 +36,8 @@ public:
 
     static void alignLeft(double maxDif = 0);
     static void alignRight(double maxDif = 0);
+    void turnTo(double angle);
+    void dropKit();
 
     void onUpdate();
 
