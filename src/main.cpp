@@ -5,15 +5,18 @@
 // include
 #include "Robot.hpp"
 
-Robot robot = Robot();
+Robot robot;
 
-void setup()
-{
+void setup() {
     // initialize serial communication
     Serial.begin(9600);
+    while (!Serial) {}
 
     // initialize Wire (I2C)
     Wire.begin();
+
+    // initialize robot
+    robot.init();
 }
 
 void loop() {

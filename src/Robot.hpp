@@ -27,7 +27,8 @@ private:
     double x = 0, y = 0;
 
 public:
-    Robot();
+    Robot() = default;
+    void init();
 
     /**
      * Sets the motors to the given speed.

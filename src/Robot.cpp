@@ -1,6 +1,6 @@
 #include "Robot.hpp"
 
-Robot::Robot() {
+void Robot::init() {
     // initialize motor pins as output.
     pinMode(MOTOR_A_SPEED, OUTPUT);
     pinMode(MOTOR_A_FORWARD, OUTPUT);
@@ -25,13 +25,17 @@ Robot::Robot() {
     // initialize reset button
     pinMode(RESET_BUTTON, INPUT);
 
-    thermometer.begin();
-    servo.attach(53);
+    if (thermometer.begin()) {
+        Serial.println("Error initializing thermometer");
+    }
+
+    if (servo.attach(53 ) == 0) {
+        Serial.println("Error initializing servo");
+    }
 
     // set initial state
-    reset();
+    Robot::reset();
 }
-
 void Robot::motor(int l, int r) {
     analogWrite(MOTOR_A_SPEED, min(abs(l), MOTOR_MAX_SPEED));
     digitalWrite(MOTOR_A_FORWARD, (l < 0) ? LOW : HIGH);
@@ -41,7 +45,6 @@ void Robot::motor(int l, int r) {
     digitalWrite(MOTOR_B_FORWARD, (r < 0) ? LOW : HIGH);
     digitalWrite(MOTOR_B_BACKWARDS, (r > 0) ? LOW : HIGH);
 }
-
 
 void Robot::turnTo(double angle) {
 
@@ -101,6 +104,8 @@ void Robot::turnTo(double angle) {
                     motor(-50, 50);
                 }
                 break;
+            default:
+                motor(0, 0);
         }
 
         delay(50);
@@ -130,7 +135,7 @@ void Robot::onUpdate() {
         while (digitalRead(RESET_BUTTON));
         Serial.println("Wait for reset button to be pressed");
         while (!digitalRead(RESET_BUTTON));
-        reset();
+        Robot::reset();
         return;
     }
 
@@ -163,6 +168,7 @@ void Robot::reset() {
     curDir = 0;
     compass.read();
     startOrientation = compass.getAngle();
+    delay(1000);
     analogWrite(LED_BUILTIN, HIGH);
     delay(1000);
     analogWrite(LED_BUILTIN, LOW);
@@ -181,3 +187,4 @@ void Robot::debug() {
     Serial.print("\tthermometer:");
     Serial.println(thermometer.getObjectTempCelsius() - thermometer.getAmbientTempCelsius());
 }
+
