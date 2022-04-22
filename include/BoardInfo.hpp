@@ -25,7 +25,4 @@
 #define LR_SENSOR_SIDE_FRONT_LEFT A6
 #define LR_SENSOR_FRONT A6
 
-// on board led
-#define ON_BOARD_LED 13
-
 #endif //EXTRATERRESTRIAL_MAZE_BOARDINFO_HPP
