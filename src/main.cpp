@@ -10,7 +10,6 @@ Robot robot;
 void setup() {
     // initialize serial communication
     Serial.begin(9600);
-    while (!Serial) {}
 
     // initialize Wire (I2C)
     Wire.begin();
