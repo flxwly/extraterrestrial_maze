@@ -10,7 +10,7 @@ Robot::Robot() {
     pinMode(MOTOR_B_BACKWARDS, OUTPUT);
 
     // Init LED
-    pinMode(ON_BOARD_LED, OUTPUT);
+    pinMode(LED_BUILTIN, OUTPUT);
 
     // initialize gray scale
     pinMode(GC_SENSOR_FRONT, INPUT);
