@@ -3,11 +3,9 @@
 #include <Wire.h>
 
 // include
-#include "Compass.hpp"
 #include "Robot.hpp"
 
-Compass compass;
-Robot robot;
+Robot robot = Robot();
 
 void setup()
 {
@@ -17,12 +15,8 @@ void setup()
     // initialize Wire (I2C)
     Wire.begin();
 
-    // initialize compass
-    compass = Compass();
-    compass.read();
-
     // initialize robot
-    robot = Robot(compass.getAngle());
+    robot.reset();
 }
 
 void loop() {

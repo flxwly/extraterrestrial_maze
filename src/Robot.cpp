@@ -1,6 +1,6 @@
 #include "Robot.hpp"
 
-Robot::Robot(double orientation) : startOrientation(orientation) {
+Robot::Robot() {
     // initialize motor pins as output.
     pinMode(MOTOR_A_SPEED, OUTPUT);
     pinMode(MOTOR_A_FORWARD, OUTPUT);

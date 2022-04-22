@@ -28,8 +28,6 @@ private:
 
 public:
     Robot() = default;
-    explicit Robot(double orientation);
-
     /**
      * Sets the motors to the given speed.
      * @param left left motor speed
