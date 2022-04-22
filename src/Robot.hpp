@@ -27,8 +27,7 @@ private:
     double x = 0, y = 0;
 
 public:
-    Robot() = default;
-    explicit Robot(double orientation);
+    Robot();
 
     /**
      * Sets the motors to the given speed.
