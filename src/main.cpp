@@ -19,15 +19,13 @@ void setup()
 
     // initialize compass
     compass = Compass();
+    compass.read();
 
     // initialize robot
     robot = Robot(compass.getAngle());
 }
 
-int angle = 0;
-
 void loop() {
     robot.onUpdate();
-
-    digitalWrite(13, LOW);
+    robot.debug();
 }

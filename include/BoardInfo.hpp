@@ -13,14 +13,17 @@
 #define MOTOR_MAX_SPEED 255
 
 // Analog Gray Scale Sensors
-#define GC_SENSOR_FRONT A7
-#define GC_SENSOR_BACK A9
+#define GC_SENSOR_FRONT A14
+#define GC_SENSOR_BACK A14
+
+#define RESET_BUTTON 52
 
 // Laser Range Sensors
 #define LR_SENSOR_SIDE_BACK_RIGHT A9
 #define LR_SENSOR_SIDE_FRONT_RIGHT A8
 #define LR_SENSOR_SIDE_BACK_LEFT A10
 #define LR_SENSOR_SIDE_FRONT_LEFT A6
+#define LR_SENSOR_FRONT A6
 
 // on board led
 #define ON_BOARD_LED 13

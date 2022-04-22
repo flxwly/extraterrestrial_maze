@@ -6,6 +6,9 @@
 #include "BoardInfo.hpp"
 #include "Servo.h"
 
+#define SERVO_DEFAULT_POSITION 150
+#define SERVO_OUT_POSITION 100
+
 #define MIN_DIST_FOR_WALL 15
 
 
@@ -18,6 +21,7 @@ private:
     Compass compass;
 
     double startOrientation = 0;
+    double curDir = 0;
 
     Tile startingTile{};
     double x = 0, y = 0;
@@ -34,15 +38,12 @@ public:
      */
     static void motor(int left, int right);
 
-    static void alignLeft(double maxDif = 0);
-    static void alignRight(double maxDif = 0);
+
     void turnTo(double angle);
     void dropKit();
 
     void onUpdate();
-
-    //    void changePos(Tile *cur);
-    //    bool isWall(int dir);
-
+    void restart();
+    void debug();
 };
 
