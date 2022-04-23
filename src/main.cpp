@@ -19,6 +19,6 @@ void setup() {
 }
 
 void loop() {
-    robot.onUpdate();
+    //robot.onUpdate();
     robot.debug();
 }
