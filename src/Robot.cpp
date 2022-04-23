@@ -14,6 +14,7 @@ void Robot::init() {
 
     // initialize gray scale
     pinMode(GC_SENSOR_FRONT, INPUT);
+    pinMode(GC_SENSOR_BACK, INPUT);
 
     // initialize laser range
     pinMode(LR_SENSOR_FRONT, INPUT);

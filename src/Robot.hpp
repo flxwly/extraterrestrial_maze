@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <DFRobot_MLX90614.h>
-#include <time.h>
 #include "Compass.hpp"
 #include "Map.hpp"
 #include "LaserRangeSensor.hpp"
