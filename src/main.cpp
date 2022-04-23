@@ -20,5 +20,6 @@ void setup() {
 
 void loop() {
     robot.onUpdate();
-    //robot.debug();
+    robot.debug();
+    //robot.turnTo(90);
 }

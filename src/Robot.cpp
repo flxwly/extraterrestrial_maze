@@ -50,15 +50,15 @@ void Robot::motor(int l, int r) {
     digitalWrite(MOTOR_B_BACKWARDS, (r > 0) ? LOW : HIGH);
 }
 
-void Robot::turnTo(double angle) {
+void Robot::turnTo(int angle) {
 
     double diff;
     double currentOrientation;
 
     do {
         compass.read();
-        currentOrientation = startOrientation - compass.getAngle();
-        diff = angle - currentOrientation;
+        currentOrientation = compass.getAngle() - startOrientation;
+        diff = (angle % 360) - currentOrientation;
 
         if (diff > 180) {
             diff -= 360;
@@ -66,7 +66,7 @@ void Robot::turnTo(double angle) {
             diff += 360;
         }
 
-        int state;
+        int state = 0;
         if (abs(diff) > 100) {
             state = 1;
         } else if (abs(diff) > 50) {
@@ -76,33 +76,34 @@ void Robot::turnTo(double angle) {
         } else if (abs(diff) > 1) {
             state = 4;
         } else {
+            state = -1;
             break;
         }
 
         switch (state) {
             case 1:
-                if (diff < 0) {
+                if (diff > 0) {
                     motor(255, -255);
                 } else {
                     motor(-255, 255);
                 }
                 break;
             case 2:
-                if (diff < 0) {
+                if (diff > 0) {
                     motor(200, -200);
                 } else {
                     motor(-200, 200);
                 }
                 break;
             case 3:
-                if (diff < 0) {
+                if (diff > 0) {
                     motor(70, -70);
                 } else {
                     motor(-70, 70);
                 }
                 break;
             case 4:
-                if (diff < 0) {
+                if (diff > 0) {
                     motor(50, -50);
                 } else {
                     motor(-50, 50);
@@ -110,24 +111,28 @@ void Robot::turnTo(double angle) {
                 break;
             default:
                 motor(0, 0);
+                break;
         }
 
         delay(50);
 
     } while (abs(diff) > 0.5 && digitalRead(RESET_BUTTON) == LOW);
+    motor(0, 0);
 }
 
 void Robot::dropKit() {
-    motor(0, 0);
-    lastKitDrop = cycles;
-    servo.write(SERVO_RETREAT_POSITION);
-    delay(2000);
-    servo.write(SERVO_DEFAULT_POSITION);
-    for (int i = 0; i < 15; ++i) {
-        digitalWrite(LED_BUILTIN, HIGH);
-        delay(100);
-        digitalWrite(LED_BUILTIN, LOW);
-        delay(100);
+    if (millis() - lastKitDrop > KIT_DROP_COOLDOWN_TIME) {
+        lastKitDrop = millis();
+        turnTo(curDir + 90);
+        servo.write(SERVO_RETREAT_POSITION);
+        delay(2000);
+        servo.write(SERVO_DEFAULT_POSITION);
+        for (int i = 0; i < 15; ++i) {
+            digitalWrite(LED_BUILTIN, HIGH);
+            delay(100);
+            digitalWrite(LED_BUILTIN, LOW);
+            delay(100);
+        }
     }
 }
 
@@ -181,26 +186,22 @@ void Robot::onUpdate() {
 
     digitalWrite(LED_BUILTIN, LOW);
     turnTo(curDir);
-    if (compass.getPitch() > 20) {
+    scanForHeatedObject();
+    avoidCollisions();
+
+    // If there's a wall in front
+    if (analogRead(GC_SENSOR_FRONT) < 200) {
+        motor(-100, -100);
+        delay(300);
+        curDir = (curDir + (random() % 2 == 0 ? 90 : -90)) % 360;
+    } else if (compass.getPitch() > 20) {
         motor(180, 180);
     } else {
         motor(100, 100);
     }
 
-    if (getDist(LR_SENSOR_FRONT) < 9) {
-        curDir = ((int) curDir + (analogRead(GC_SENSOR_FRONT) % 2 == 0 ? 90 : -90)) % 360;
-    } else if (analogRead(GC_SENSOR_FRONT) < 200) {
-        motor(-100, -100);
-        delay(300);
-        curDir = ((int) curDir + (random() % 2 == 0 ? 90 : -90)) % 360;
-    } else if (thermometer.getObjectTempCelsius() - thermometer.getAmbientTempCelsius() > 5 &&
-               cycles - lastKitDrop > KIT_DROP_COOLDOWN_TIME) {
-        turnTo(((int) curDir - 90) % 360);
-        dropKit();
-    }
-
-
     cycles++;
+    turnState = 0;
 }
 
 void Robot::reset() {
@@ -232,5 +233,43 @@ void Robot::debug() {
     Serial.print(thermometer.getObjectTempCelsius() - thermometer.getAmbientTempCelsius());
     Serial.print("\tTime: ");
     Serial.println(cycles);
+}
+
+void Robot::scanForHeatedObject() {
+    if (thermometer.getObjectTempCelsius() - thermometer.getAmbientTempCelsius() >
+        MINIMAL_TEMPERATURE_DIFFERENCE_FOR_HEATED_OBJECT) {
+        dropKit();
+    }
+}
+
+void Robot::avoidCollisions() {
+    if (getDist(LR_SENSOR_FRONT) < 9) {
+        switch (turnState) {
+            case 0:
+                if (getDist(LR_SENSOR_FRONT) < 10) {
+                    turnState = 1;
+                    curDir = curDir + 90;
+                }
+
+                if (getDist(LR_SENSOR_LEFT) >= 10) {
+                    turnState *= 2;
+                }
+                break;
+            case 1:
+                if (getDist(LR_SENSOR_FRONT) < 10) {
+                    curDir = curDir + 90;
+                }
+                turnState = 0;
+                break;
+            case 2:
+                if (getDist(LR_SENSOR_FRONT) < 10) {
+                    curDir = curDir + 180;
+                } else {
+                    curDir = curDir + ((random() % 2) ? 0 : 180);
+                }
+                turnState = 0;
+                break;
+        }
+    }
 }
 

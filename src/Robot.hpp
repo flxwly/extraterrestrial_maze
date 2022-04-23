@@ -9,6 +9,7 @@
 #define SERVO_DEFAULT_POSITION 52
 #define SERVO_RETREAT_POSITION 90
 #define KIT_DROP_COOLDOWN_TIME 10
+#define MINIMAL_TEMPERATURE_DIFFERENCE_FOR_HEATED_OBJECT 5
 
 #define MIN_DIST_FOR_WALL 15
 
@@ -22,6 +23,7 @@ private:
 
     double startOrientation = 0;
     int curDir = 0;
+    int turnState = 0;
 
     Tile *curTile = new Tile();
     int lastLRSensorReadingLeft = 0;
@@ -57,7 +59,9 @@ public:
      * @param dir direction to turn to
      * @note dir is in range [-180, 180]
      */
-    void turnTo(double angle);
+    void turnTo(int dir);
+
+    void scanForHeatedObject();
 
     /**
      * Drops a rescue kit and blinks the onboard LED.
@@ -80,5 +84,7 @@ public:
      * Outputs various information about the robot to the serial monitor.
      */
     void debug();
+
+    void avoidCollisions();
 };
 
