@@ -14,13 +14,10 @@ void Robot::init() {
 
     // initialize gray scale
     pinMode(GC_SENSOR_FRONT, INPUT);
-    pinMode(GC_SENSOR_BACK, INPUT);
 
     // initialize laser range
-    pinMode(LR_SENSOR_SIDE_FRONT_RIGHT, INPUT);
-    pinMode(LR_SENSOR_SIDE_BACK_RIGHT, INPUT);
-    pinMode(LR_SENSOR_SIDE_FRONT_LEFT, INPUT);
-    pinMode(LR_SENSOR_SIDE_BACK_LEFT, INPUT);
+    pinMode(LR_SENSOR_FRONT, INPUT);
+    pinMode(LR_SENSOR_LEFT, INPUT);
 
     // initialize reset button
     pinMode(RESET_BUTTON, INPUT);
@@ -28,14 +25,20 @@ void Robot::init() {
     if (thermometer.begin()) {
         Serial.println("Error initializing thermometer");
     }
-
-    if (servo.attach(53 ) == 0) {
-        Serial.println("Error initializing servo");
+    if (SERVO_RETREAT_POSITION < SERVO_DEFAULT_POSITION) {
+        servo.attach(53, SERVO_DEFAULT_POSITION, SERVO_RETREAT_POSITION);
+    } else {
+        servo.attach(53, SERVO_RETREAT_POSITION, SERVO_DEFAULT_POSITION);
     }
+
+    lastKitDrop = 0;
+    servo.write(SERVO_DEFAULT_POSITION);
+    delay(1000);
 
     // set initial state
     Robot::reset();
 }
+
 void Robot::motor(int l, int r) {
     analogWrite(MOTOR_A_SPEED, min(abs(l), MOTOR_MAX_SPEED));
     digitalWrite(MOTOR_A_FORWARD, (l < 0) ? LOW : HIGH);
@@ -69,7 +72,7 @@ void Robot::turnTo(double angle) {
             state = 2;
         } else if (abs(diff) > 15) {
             state = 3;
-        } else if (abs(diff) > 1){
+        } else if (abs(diff) > 1) {
             state = 4;
         } else {
             break;
@@ -110,15 +113,16 @@ void Robot::turnTo(double angle) {
 
         delay(50);
 
-    } while (abs(diff) > 1 && digitalRead(RESET_BUTTON) == LOW);
+    } while (abs(diff) > 0.5 && digitalRead(RESET_BUTTON) == LOW);
 }
 
 void Robot::dropKit() {
     motor(0, 0);
-    servo.write(SERVO_OUT_POSITION);
-    delay(1000);
+    lastKitDrop = cycles;
+    servo.write(SERVO_RETREAT_POSITION);
+    delay(2000);
     servo.write(SERVO_DEFAULT_POSITION);
-    for (int i = 0; i < 20; ++i) {
+    for (int i = 0; i < 15; ++i) {
         digitalWrite(LED_BUILTIN, HIGH);
         delay(100);
         digitalWrite(LED_BUILTIN, LOW);
@@ -126,8 +130,41 @@ void Robot::dropKit() {
     }
 }
 
+void Robot::checkForNewTiles() {
+    if (abs(lastAngle - compass.getAngle()) > 20) {
+        lastAngle = compass.getAngle();
+        return;
+    }
+
+    if (abs(lastLRSensorReadingLeft - getDist(LR_SENSOR_LEFT)) > 40) {
+        if (!curTile->getTile(curDir)) {
+            curTile->addNewTile(curDir);
+            curTile = curTile->getTile(curDir);
+            Serial.println("New tile added to the front");
+        }
+
+        int dir = (curDir - 90) % 360;
+        if (!curTile->getTile(dir)) {
+            curTile->addNewTile(dir);
+            Serial.println("New tile added to the left");
+        }
+
+    }
+    if (abs(lastLRSensorReadingRight - getDist(LR_SENSOR_RIGHT)) > 40 && false) {
+        if (!curTile->getTile(curDir))
+            curTile->addNewTile(curDir);
+
+        int dir = (curDir + 90) % 360;
+        if (!curTile->getTile(dir))
+            curTile->addNewTile(dir);
+    }
+
+    lastAngle = compass.getAngle();
+    lastLRSensorReadingLeft = getDist(LR_SENSOR_LEFT);
+    lastLRSensorReadingRight = getDist(LR_SENSOR_RIGHT);
+}
+
 void Robot::onUpdate() {
-    // update the onboard led
 
     if (digitalRead(RESET_BUTTON)) {
         motor(0, 0);
@@ -135,39 +172,43 @@ void Robot::onUpdate() {
         while (digitalRead(RESET_BUTTON));
         Serial.println("Wait for reset button to be pressed");
         while (!digitalRead(RESET_BUTTON));
+        while (digitalRead(RESET_BUTTON));
+        Serial.println("Resetting");
         Robot::reset();
         return;
     }
 
     digitalWrite(LED_BUILTIN, LOW);
     turnTo(curDir);
-    compass.read();
-    if (compass.getPitch() > 10) {
-        motor(255, 255);
+    if (compass.getPitch() > 20) {
+        motor(180, 180);
     } else {
         motor(100, 100);
     }
 
-    if (getDist(LR_SENSOR_FRONT) < 8) {
+    if (getDist(LR_SENSOR_FRONT) < 9) {
         curDir = ((int) curDir + (analogRead(GC_SENSOR_FRONT) % 2 == 0 ? 90 : -90)) % 360;
     } else if (analogRead(GC_SENSOR_FRONT) < 200) {
         motor(-100, -100);
-        delay(500);
+        delay(300);
         curDir = ((int) curDir + (random() % 2 == 0 ? 90 : -90)) % 360;
-    } else if (thermometer.getObjectTempCelsius() - thermometer.getAmbientTempCelsius() > 5) {
+    } else if (thermometer.getObjectTempCelsius() - thermometer.getAmbientTempCelsius() > 5 &&
+               cycles - lastKitDrop > KIT_DROP_COOLDOWN_TIME) {
         turnTo(((int) curDir - 90) % 360);
         dropKit();
-        turnTo(curDir);
-        motor(100, 100);
-        delay(600);
     }
 
+
+    cycles++;
 }
 
 void Robot::reset() {
     curDir = 0;
     compass.read();
     startOrientation = compass.getAngle();
+    lastAngle = compass.getAngle();
+    lastLRSensorReadingLeft = getDist(LR_SENSOR_LEFT);
+    lastLRSensorReadingRight = getDist(LR_SENSOR_RIGHT);
     delay(1000);
     analogWrite(LED_BUILTIN, HIGH);
     delay(1000);
@@ -178,13 +219,17 @@ void Robot::debug() {
     compass.read();
     Serial.print("Servo: ");
     Serial.print(servo.read());
-    Serial.print("\tLRS: ");
+    Serial.print("\tLRS_FRONT: ");
     Serial.print(getDist(LR_SENSOR_FRONT));
+    Serial.print("\tLRS_LEFT: ");
+    Serial.print(getDist(LR_SENSOR_LEFT));
     Serial.print("\tcompass: ");
     Serial.print(compass.getPitch());
-    Serial.print("\tGC_Front:");
+    Serial.print("\tGC_Front: ");
     Serial.print(analogRead(GC_SENSOR_FRONT));
-    Serial.print("\tthermometer:");
-    Serial.println(thermometer.getObjectTempCelsius() - thermometer.getAmbientTempCelsius());
+    Serial.print("\tthermometer: ");
+    Serial.print(thermometer.getObjectTempCelsius() - thermometer.getAmbientTempCelsius());
+    Serial.print("\tTime: ");
+    Serial.println(cycles);
 }
 

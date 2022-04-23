@@ -4,10 +4,10 @@
 #include <math.h>
 #include "BoardInfo.hpp"
 
-#define LEFT 1
-#define RIGHT 2
-#define TOP 3
-#define BOTTOM 4
+#define TOP 0
+#define RIGHT 90
+#define BOTTOM 180
+#define LEFT 270
 
 #define TILES_PER_MAP 100
 
