@@ -1,5 +1,8 @@
 #include "Robot.hpp"
 
+
+
+
 void Robot::init() {
     // initialize motor pins as output.
     pinMode(MOTOR_A_SPEED, OUTPUT);
@@ -123,7 +126,7 @@ void Robot::turnTo(int angle) {
 void Robot::dropKit() {
     if (millis() - lastKitDrop > KIT_DROP_COOLDOWN_TIME) {
         lastKitDrop = millis();
-        turnTo(curDir + 90);
+        turnTo(targetedOrientation + 90);
         servo.write(SERVO_RETREAT_POSITION);
         delay(2000);
         servo.write(SERVO_DEFAULT_POSITION);
@@ -143,13 +146,13 @@ void Robot::checkForNewTiles() {
     }
 
     if (abs(lastLRSensorReadingLeft - getDist(LR_SENSOR_LEFT)) > 40) {
-        if (!curTile->getTile(curDir)) {
-            curTile->addNewTile(curDir);
-            curTile = curTile->getTile(curDir);
+        if (!curTile->getTile(targetedOrientation)) {
+            curTile->addNewTile(targetedOrientation);
+            curTile = curTile->getTile(targetedOrientation);
             Serial.println("New tile added to the front");
         }
 
-        int dir = (curDir - 90) % 360;
+        int dir = (targetedOrientation - 90) % 360;
         if (!curTile->getTile(dir)) {
             curTile->addNewTile(dir);
             Serial.println("New tile added to the left");
@@ -157,10 +160,10 @@ void Robot::checkForNewTiles() {
 
     }
     if (abs(lastLRSensorReadingRight - getDist(LR_SENSOR_RIGHT)) > 40 && false) {
-        if (!curTile->getTile(curDir))
-            curTile->addNewTile(curDir);
+        if (!curTile->getTile(targetedOrientation))
+            curTile->addNewTile(targetedOrientation);
 
-        int dir = (curDir + 90) % 360;
+        int dir = (targetedOrientation + 90) % 360;
         if (!curTile->getTile(dir))
             curTile->addNewTile(dir);
     }
@@ -185,27 +188,27 @@ void Robot::onUpdate() {
     }
 
     digitalWrite(LED_BUILTIN, LOW);
-    turnTo(curDir);
+    turnTo(targetedOrientation);
     scanForHeatedObject();
     avoidCollisions();
+    scanForOpenSpace();
 
     // If there's a wall in front
     if (analogRead(GC_SENSOR_FRONT) < 200) {
         motor(-100, -100);
         delay(300);
-        curDir = (curDir + (random() % 2 == 0 ? 90 : -90)) % 360;
+        targetedOrientation = (targetedOrientation + (random() % 2 == 0 ? 90 : -90)) % 360;
     } else if (compass.getPitch() > 20) {
         motor(180, 180);
     } else {
         motor(100, 100);
     }
 
-    cycles++;
     turnState = 0;
 }
 
 void Robot::reset() {
-    curDir = 0;
+    targetedOrientation = 0;
     compass.read();
     startOrientation = compass.getAngle();
     lastAngle = compass.getAngle();
@@ -232,7 +235,7 @@ void Robot::debug() {
     Serial.print("\tthermometer: ");
     Serial.print(thermometer.getObjectTempCelsius() - thermometer.getAmbientTempCelsius());
     Serial.print("\tTime: ");
-    Serial.println(cycles);
+    Serial.println(millis());
 }
 
 void Robot::scanForHeatedObject() {
@@ -242,13 +245,26 @@ void Robot::scanForHeatedObject() {
     }
 }
 
+void Robot::scanForOpenSpace() {
+    if (getDist(LR_SENSOR_LEFT) < MIN_SHORT_DISTANCE_TO_RECOGNIZE_OPEN_SPACE) {
+        lastShortDistanceReading = millis();
+    } else {
+        if (millis() - lastShortDistanceReading > MIN_DURATION_AFTER_SHORT_DISTANCE_TO_TURN_INTO_OPEN_SPACE) {
+            if ((random() % 100) < PROBABILITY_OF_TURNING_INTO_OPEN_SPACE) {
+                targetedOrientation = targetedOrientation + 90;
+            }
+            lastShortDistanceReading = millis();
+        }
+    }
+}
+
 void Robot::avoidCollisions() {
     if (getDist(LR_SENSOR_FRONT) < 9) {
         switch (turnState) {
             case 0:
                 if (getDist(LR_SENSOR_FRONT) < 10) {
                     turnState = 1;
-                    curDir = curDir + 90;
+                    targetedOrientation = targetedOrientation + 90;
                 }
 
                 if (getDist(LR_SENSOR_LEFT) >= 10) {
@@ -257,19 +273,18 @@ void Robot::avoidCollisions() {
                 break;
             case 1:
                 if (getDist(LR_SENSOR_FRONT) < 10) {
-                    curDir = curDir + 90;
+                    targetedOrientation = targetedOrientation + 90;
                 }
                 turnState = 0;
                 break;
             case 2:
                 if (getDist(LR_SENSOR_FRONT) < 10) {
-                    curDir = curDir + 180;
+                    targetedOrientation = targetedOrientation + 180;
                 } else {
-                    curDir = curDir + ((random() % 2) ? 0 : 180);
+                    targetedOrientation = targetedOrientation + ((random() % 2) ? 0 : 180);
                 }
                 turnState = 0;
                 break;
         }
     }
 }
-

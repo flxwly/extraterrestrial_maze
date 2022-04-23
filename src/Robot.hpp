@@ -9,6 +9,9 @@
 #define SERVO_DEFAULT_POSITION 52
 #define SERVO_RETREAT_POSITION 90
 #define KIT_DROP_COOLDOWN_TIME 10
+#define PROBABILITY_OF_TURNING_INTO_OPEN_SPACE 30
+#define MIN_SHORT_DISTANCE_TO_RECOGNIZE_OPEN_SPACE 40
+#define MIN_DURATION_AFTER_SHORT_DISTANCE_TO_TURN_INTO_OPEN_SPACE 10000
 #define MINIMAL_TEMPERATURE_DIFFERENCE_FOR_HEATED_OBJECT 5
 
 #define MIN_DIST_FOR_WALL 15
@@ -22,19 +25,18 @@ private:
     Compass compass;
 
     double startOrientation = 0;
-    int curDir = 0;
+    int targetedOrientation = 0;
     int turnState = 0;
+
 
     Tile *curTile = new Tile();
     int lastLRSensorReadingLeft = 0;
     int lastLRSensorReadingRight = 0;
     unsigned int lastAngle = 0;
 
-    double x = 0, y = 0;
-
-    // Rescue kits
-    unsigned long cycles = KIT_DROP_COOLDOWN_TIME;
+    // time of last kit drop
     unsigned long lastKitDrop = 0;
+    unsigned long lastShortDistanceReading = 0;
 
 public:
     Robot() = default;
@@ -62,6 +64,8 @@ public:
     void turnTo(int dir);
 
     void scanForHeatedObject();
+
+    void scanForOpenSpace();
 
     /**
      * Drops a rescue kit and blinks the onboard LED.
